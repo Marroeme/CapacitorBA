@@ -1,0 +1,15 @@
+.page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Vertikale Zentrierung */
+    }
+  
+  .auth-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--ion-color-primary);
+    border-radius: 16px;
+  }
+  
