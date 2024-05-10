@@ -1,0 +1,7 @@
+{
+  "name": "CapacitorBA",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
