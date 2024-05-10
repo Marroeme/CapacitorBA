@@ -47,5 +47,7 @@
 		<true />
 		<key>NSFaceIDUsageDescription</key>
 		<string>Face ID access is required</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Privacy - Location When In Use Usage Description</string>
 	</dict>
 </plist>

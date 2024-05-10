@@ -1,6 +1,6 @@
 import { IonButton, IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonText, IonTitle, IonToolbar } from "@ionic/react";
 import React from "react";
-import "./Home.css"; // CSS-Datei importieren
+import "./Home.css";
 
 const Home: React.FC = () => {
   return (
@@ -13,9 +13,9 @@ const Home: React.FC = () => {
           <IonTitle>Willkommen</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="page-content">
-        <IonText slot="fixed">
-          <h2>Wähle eine Anforderung aus dem Menü.</h2>
+      <IonContent>
+        <IonText className="page-content">
+          <p>Wähle eine Anforderung aus dem Menü.</p>
         </IonText>
       </IonContent>
     </IonPage>
