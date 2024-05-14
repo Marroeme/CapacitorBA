@@ -1,5 +1,7 @@
-import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar } from "@ionic/react";
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar } from "@ionic/react";
 import React, { useState } from "react";
+import { document } from "ionicons/icons";
+
 import "./PDF.css";
 
 const PDF = () => {
@@ -27,6 +29,11 @@ const PDF = () => {
         <IonToolbar>
           <IonButtons slot="start">
             <IonMenuButton />
+          </IonButtons>
+          <IonButtons slot="end">
+            <IonButton fill="clear">
+              <IonIcon icon={document} size="large" color="black" />
+            </IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
