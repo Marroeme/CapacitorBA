@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { IonAlert, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonContent, IonFab, IonFabButton, IonIcon, IonList, IonItem, IonLabel, IonImg, IonModal, IonButton } from "@ionic/react";
 import { Camera, CameraResultType } from "@capacitor/camera";
 import { Filesystem, Directory } from "@capacitor/filesystem";
-import { camera, arrowBack } from "ionicons/icons";
+import { camera, arrowBack, create } from "ionicons/icons";
+import FilerobotImageEditor from "react-filerobot-image-editor";
 import "./Photos.css";
 
 interface Photo {
@@ -15,6 +16,7 @@ const Photos: React.FC = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [showAlert, setShowAlert] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [currentPhoto, setCurrentPhoto] = useState<Photo | null>(null);
 
@@ -54,7 +56,7 @@ const Photos: React.FC = () => {
           }
         })
       );
-      setPhotos(loadedPhotos.filter((photo) => photo !== undefined)); // Filtern undefined Werte aus, falls vorhanden
+      setPhotos(loadedPhotos.filter((photo) => photo !== undefined));
     } catch (e) {
       console.error("Error loading photos:", e);
     }
@@ -63,14 +65,14 @@ const Photos: React.FC = () => {
   const takePhoto = async () => {
     try {
       const photo = await Camera.getPhoto({
-        resultType: CameraResultType.Uri, // Change to Uri to save file instead of DataUrl
+        resultType: CameraResultType.Uri,
         quality: 90,
       });
 
       const fileName = `photo-${Date.now()}.jpeg`;
       if (photo.path) {
         const base64Data = await Filesystem.readFile({
-          path: photo.path, // Make sure this is a string as expected
+          path: photo.path,
         });
 
         await Filesystem.writeFile({
@@ -99,9 +101,29 @@ const Photos: React.FC = () => {
         path: selectedPhoto.filename,
       });
       setPhotos(photos.filter((p) => p.filename !== selectedPhoto.filename));
-      setSelectedPhoto(null); // Reset nach dem Löschen
+      setSelectedPhoto(null);
     }
-    setShowAlert(false); // Schließen des Alerts
+    setShowAlert(false);
+  };
+
+  const editPhoto = (photo: Photo) => {
+    setCurrentPhoto(photo);
+    setShowEditor(true);
+  };
+
+  const saveEditedPhoto = async (editedBase64: string) => {
+    if (currentPhoto) {
+      await Filesystem.writeFile({
+        path: currentPhoto.filename,
+        data: editedBase64.split(",")[1],
+        directory: Directory.Data,
+      });
+
+      setPhotos((prevPhotos) => prevPhotos.map((p) => (p.filename === currentPhoto.filename ? { ...p, dataUrl: editedBase64 } : p)));
+      setShowEditor(false);
+      setShowModal(true);
+      setCurrentPhoto({ ...currentPhoto, dataUrl: editedBase64 });
+    }
   };
 
   return (
@@ -121,7 +143,7 @@ const Photos: React.FC = () => {
               key={index}
               className="photo-item"
               onContextMenu={(e) => {
-                e.preventDefault(); // Verhindert das normale Kontextmenü
+                e.preventDefault();
                 handleLongPress(photo);
               }}
               onClick={() => openModal(photo)}
@@ -132,41 +154,65 @@ const Photos: React.FC = () => {
           ))}
         </IonList>
         <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
-          <IonContent className="full-screen-image">
-            <IonButton fill="clear" className="back-button" onClick={() => setShowModal(false)}>
-              <IonIcon icon={arrowBack} size="large" />
-            </IonButton>
-            {currentPhoto && <IonImg src={currentPhoto.dataUrl} />}
-          </IonContent>
+          <IonHeader>
+            <IonToolbar>
+              <IonButtons slot="start">
+                <IonButton fill="clear" onClick={() => setShowModal(false)}>
+                  <IonIcon icon={arrowBack} size="large" color="black" />
+                </IonButton>
+              </IonButtons>
+              <IonButtons slot="end">
+                <IonButton fill="clear" onClick={() => currentPhoto && editPhoto(currentPhoto)}>
+                  <IonIcon icon={create} size="large" color="black" />
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="full-screen-image">{currentPhoto && <IonImg src={currentPhoto.dataUrl} />}</IonContent>
         </IonModal>
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
           <IonFabButton onClick={takePhoto}>
             <IonIcon icon={camera} />
           </IonFabButton>
         </IonFab>
+        <IonAlert
+          isOpen={showAlert}
+          onDidDismiss={() => setShowAlert(false)}
+          header={"Foto löschen"}
+          message={"Möchten Sie dieses Foto wirklich löschen?"}
+          buttons={[
+            {
+              text: "Abbrechen",
+              role: "cancel",
+              cssClass: "secondary",
+              handler: (blah) => {
+                setShowAlert(false);
+              },
+            },
+            {
+              text: "Löschen",
+              handler: () => {
+                deletePhoto();
+              },
+            },
+          ]}
+        />
+        <IonModal isOpen={showEditor} onDidDismiss={() => setShowEditor(false)}>
+          <IonContent>
+            {currentPhoto && (
+              <FilerobotImageEditor
+                source={currentPhoto.dataUrl!}
+                savingPixelRatio={1}
+                previewPixelRatio={1}
+                onSave={(editedImageObject, designState) => {
+                  saveEditedPhoto(editedImageObject.imageBase64!);
+                }}
+                onClose={() => setShowEditor(false)}
+              />
+            )}
+          </IonContent>
+        </IonModal>
       </IonContent>
-      <IonAlert
-        isOpen={showAlert}
-        onDidDismiss={() => setShowAlert(false)}
-        header={"Foto löschen"}
-        message={"Möchten Sie dieses Foto wirklich löschen?"}
-        buttons={[
-          {
-            text: "Abbrechen",
-            role: "cancel",
-            cssClass: "secondary",
-            handler: (blah) => {
-              setShowAlert(false);
-            },
-          },
-          {
-            text: "Löschen",
-            handler: () => {
-              deletePhoto();
-            },
-          },
-        ]}
-      />
     </IonPage>
   );
 };
