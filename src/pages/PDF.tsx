@@ -1,10 +1,17 @@
-import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonPage, IonTitle, IonToolbar } from "@ionic/react";
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonMenuButton, IonModal, IonPage, IonTitle, IonToolbar } from "@ionic/react";
 import React, { useState } from "react";
-import { document } from "ionicons/icons";
-
+import { document, arrowBack } from "ionicons/icons";
+import { jsPDF } from "jspdf";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import packageJson from "../../package.json";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import "./PDF.css";
 
-const PDF = () => {
+const pdfjsVersion = packageJson.dependencies["pdfjs-dist"];
+
+const PDF: React.FC = () => {
   const [form, setForm] = useState({
     schadensnummer: "",
     schadenart: "",
@@ -19,9 +26,64 @@ const PDF = () => {
     datum: "",
   });
 
+  const [pdfData, setPdfData] = useState<string | null>(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+
   const handleChange = (e: { target: { name: any; value: any } }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  const generatePdf = () => {
+    const doc = new jsPDF();
+
+    // Set font and font size
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Blanko-Auftrag", 10, 20);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Schadensnummer:", 10, 35);
+    doc.setFont("helvetica", "normal");
+    doc.text(form.schadensnummer, 50, 35);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Schadenart:", 10, 45);
+    doc.setFont("helvetica", "normal");
+    doc.text(form.schadenart, 35, 45);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Versicherungszweig:", 10, 55);
+    doc.setFont("helvetica", "normal");
+    doc.text(form.versicherungszweig, 53, 55);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Datum:", 10, 65);
+    doc.setFont("helvetica", "normal");
+    doc.text(form.datum, 30, 65);
+
+    // Add a horizontal line
+    doc.setLineWidth(0.5);
+    doc.line(10, 80, 200, 80);
+
+    // Contact details
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Kontaktdaten", 10, 90);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${form.anrede} ${form.vorname} ${form.nachname}`, 10, 100);
+    doc.text(form.strasse, 10, 110);
+    doc.text(`${form.plz} ${form.ort}`, 10, 120);
+
+    const pdfDataUri = doc.output("datauristring");
+    setPdfData(pdfDataUri);
+    setShowPdfModal(true);
+  };
+
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   return (
     <IonPage>
@@ -31,7 +93,7 @@ const PDF = () => {
             <IonMenuButton />
           </IonButtons>
           <IonButtons slot="end">
-            <IonButton fill="clear">
+            <IonButton fill="clear" onClick={generatePdf}>
               <IonIcon icon={document} size="large" color="black" />
             </IonButton>
           </IonButtons>
@@ -49,8 +111,8 @@ const PDF = () => {
             <label>Schadenart</label>
             <select name="schadenart" value={form.schadenart} onChange={handleChange}>
               <option value="">Bitte auswählen</option>
-              <option value="Auto">Feuer</option>
-              <option value="Fahrrad">Sturm</option>
+              <option value="Feuer">Feuer</option>
+              <option value="Sturm">Sturm</option>
             </select>
           </div>
 
@@ -105,6 +167,28 @@ const PDF = () => {
           </div>
         </form>
       </IonContent>
+
+      <IonModal isOpen={showPdfModal} onDidDismiss={() => setShowPdfModal(false)}>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setShowPdfModal(false)}>
+                <IonIcon icon={arrowBack} />
+              </IonButton>
+            </IonButtons>
+            <IonTitle>PDF Vorschau</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          {pdfData && (
+            <div style={{ height: "100%" }}>
+              <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsVersion}/build/pdf.worker.min.js`}>
+                <Viewer fileUrl={pdfData} plugins={[defaultLayoutPluginInstance]} />
+              </Worker>
+            </div>
+          )}
+        </IonContent>
+      </IonModal>
     </IonPage>
   );
 };
