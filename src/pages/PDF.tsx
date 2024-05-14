@@ -12,6 +12,7 @@ import "./PDF.css";
 const pdfjsVersion = packageJson.dependencies["pdfjs-dist"];
 
 const PDF: React.FC = () => {
+  // Initialer Zustand für das Formular
   const [form, setForm] = useState({
     schadensnummer: "",
     schadenart: "",
@@ -26,17 +27,19 @@ const PDF: React.FC = () => {
     datum: "",
   });
 
-  const [pdfData, setPdfData] = useState<string | null>(null);
-  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfData, setPdfData] = useState<string | null>(null); // Zustand für die PDF-Daten
+  const [showPdfModal, setShowPdfModal] = useState(false); // Zustand für das PDF-Vorschau-Modalfenster
 
+  // Funktion zur Handhabung von Formularänderungen
   const handleChange = (e: { target: { name: any; value: any } }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Funktion zum Generieren des PDFs
   const generatePdf = () => {
     const doc = new jsPDF();
 
-    // Set font and font size
+    // Schriftart und -größe setzen
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
@@ -63,11 +66,11 @@ const PDF: React.FC = () => {
     doc.setFont("helvetica", "normal");
     doc.text(form.datum, 30, 65);
 
-    // Add a horizontal line
+    // Horizontale Linie hinzufügen
     doc.setLineWidth(0.5);
     doc.line(10, 80, 200, 80);
 
-    // Contact details
+    // Kontaktdaten
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.text("Kontaktdaten", 10, 90);
@@ -79,8 +82,8 @@ const PDF: React.FC = () => {
     doc.text(`${form.plz} ${form.ort}`, 10, 120);
 
     const pdfDataUri = doc.output("datauristring");
-    setPdfData(pdfDataUri);
-    setShowPdfModal(true);
+    setPdfData(pdfDataUri); // PDF-Daten setzen
+    setShowPdfModal(true); // PDF-Vorschau-Modalfenster öffnen
   };
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();

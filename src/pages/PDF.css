@@ -1,23 +1,20 @@
-  h1, h2 {
-    text-align: left;
-    padding-left: 10px;
+h1, h2 {
+  text-align: left; /* Linksbündiger Text */
+  padding-left: 10px; /* Linker Innenabstand */
+}
 
-  }
-  
-  .input-group {
-    padding: 10px;
+.input-group {
+  padding: 10px; /* Innenabstand */
+}
 
-  }
-  
-  input, select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  label {
-    font-weight: bold;
-  }
-  
+input, select {
+  width: 100%; /* Volle Breite */
+  padding: 10px; /* Innenabstand */
+  margin-top: 5px; /* Oberer Außenabstand */
+  border: 1px solid #ccc; /* Rahmen */
+  border-radius: 5px; /* Abgerundete Ecken */
+}
+
+label {
+  font-weight: bold; /* Fettschrift */
+}

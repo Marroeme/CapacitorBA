@@ -1,20 +1,19 @@
-/* Notification.css */
 .fullheight {
   height: 100%;
 }
 
 .xc {
-  display: flex;
-  flex-direction: column; /* Arrange items vertically */
-  align-items: center; /* Center horizontally */
-  justify-content: center; /* Center vertically */
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; /* Horizontale Zentrierung */
+  justify-content: center; /* Vertikale Zentrierung */
 }
 
 .timer-title {
-  font-size: 1.5em;
-  margin-bottom: 20px; /* Space between the title and button */
+  font-size: 1.5em; 
+  margin-bottom: 20px; /* Unterer Rand */
 }
 
 .start-button {
-  margin-top: 10px; /* Extra space between the title and button */
+  margin-top: 10px; /* Oberer Rand */
 }

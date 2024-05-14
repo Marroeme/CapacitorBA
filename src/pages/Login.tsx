@@ -7,23 +7,26 @@ import { FingerprintAIO } from "@awesome-cordova-plugins/fingerprint-aio";
 
 const Login: React.FC = () => {
   const router = useIonRouter();
+
+  // Funktion zur Durchführung der Anmeldung mit biometrischer Authentifizierung
   const doLogin = async () => {
     if (isPlatform("mobile")) {
+      // Prüft, ob die App auf einem mobilen Gerät läuft
       try {
-        console.log("Attempting biometric authentication...");
+        console.log("Versuch der biometrischen Authentifizierung...");
         const result = await FingerprintAIO.show({
           title: "Biometrische Authentifizierung",
           subtitle: "Bestätigen Sie mit Fingerabdruck oder Gesichtserkennung",
           description: "Authentifizieren Sie sich, um fortzufahren",
           disableBackup: true, // Erlaubt keine Passwort-Eingabe als Backup
         });
-        console.log("Authentication successful:", result);
-        router.push("/app", "root");
+        console.log("Authentifizierung erfolgreich:", result);
+        router.push("/app", "root"); // Weiterleitung zur Hauptanwendung nach erfolgreicher Authentifizierung
       } catch (error) {
-        console.error("Authentication failed:", error);
+        console.error("Authentifizierung fehlgeschlagen:", error); // Fehlerbehandlung für Authentifizierungsfehler
       }
     } else {
-      router.push("/app", "root");
+      router.push("/app", "root"); // Weiterleitung zur Hauptanwendung auf nicht-mobilen Geräten
     }
   };
 

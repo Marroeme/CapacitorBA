@@ -1,7 +1,7 @@
 .photo-item {
     margin-bottom: 10px; /* Abstand zwischen den Elementen */
-    border-radius: 5px; /* Optional: Abrundung der Ecken */
-    transition: transform 0.1s ease-in-out; /* Sanfte Animation für das Drücken */
+    border-radius: 5px; /* Abrundung der Ecken */
+    transition: transform 0.1s ease-in-out; /* Animation für das Drücken */
   }
   
   .photo-item:active {
@@ -23,7 +23,7 @@
   }
   
   .full-screen-image ion-img {
-    display: block; /* Entfernt eventuelle zusätzliche Margin/Padding */
+    display: block;
     width: 100%;
     height: 100%;
   }

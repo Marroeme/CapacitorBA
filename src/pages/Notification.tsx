@@ -1,37 +1,33 @@
-// Import necessary Ionic components and Capacitor Local Notifications
 import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar, IonButton } from "@ionic/react";
 import React, { useState, useEffect } from "react";
 import { LocalNotifications, PermissionStatus } from "@capacitor/local-notifications";
-import "./Notification.css"; // Import the external stylesheet
+import "./Notification.css";
 
 const Notification: React.FC = () => {
-  // Initial timer duration
-  const initialTime = 5; // 5 seconds
+  const initialTime = 5; // Anfangszeit in Sekunden
 
-  // State variables to track remaining seconds and if the timer is running
-  const [remainingSeconds, setRemainingSeconds] = useState(initialTime);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [notificationsAllowed, setNotificationsAllowed] = useState<boolean | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState(initialTime); // Zustand für verbleibende Sekunden
+  const [timerRunning, setTimerRunning] = useState(false); // Zustand, ob der Timer läuft
+  const [notificationsAllowed, setNotificationsAllowed] = useState<boolean | null>(null); // Zustand, ob Benachrichtigungen erlaubt sind
 
-  // Check and request notification permissions
+  // Funktion zur Überprüfung und Anforderung von Benachrichtigungsberechtigungen
   const checkAndRequestPermission = async () => {
-    // Check for existing permission status
     const permissionStatus: PermissionStatus = await LocalNotifications.checkPermissions();
     if (permissionStatus.display === "granted") {
       setNotificationsAllowed(true);
     } else {
-      // Request permission if not already granted
       const requestStatus = await LocalNotifications.requestPermissions();
       setNotificationsAllowed(requestStatus.display === "granted");
     }
   };
 
-  // Call permission check once on component mount
+  // Effekt, der beim Mounten der Komponente ausgeführt wird
   useEffect(() => {
     checkAndRequestPermission();
-    createNotificationChannel();
+    createNotificationChannel(); // Benachrichtigungskanal erstellen
   }, []);
 
+  // Funktion zur Erstellung eines Benachrichtigungskanals
   const createNotificationChannel = async () => {
     await LocalNotifications.createChannel({
       id: "high-priority-channel",
@@ -41,6 +37,7 @@ const Notification: React.FC = () => {
     });
   };
 
+  // Funktion zur Anzeige einer Benachrichtigung
   const showNotification = async () => {
     if (notificationsAllowed) {
       await LocalNotifications.schedule({
@@ -49,16 +46,16 @@ const Notification: React.FC = () => {
             title: "Timer",
             body: "Timer abgelaufen",
             id: 1,
-            channelId: "high-priority-channel", // Assign notification to high-priority channel
+            channelId: "high-priority-channel",
           },
         ],
       });
     } else {
-      console.log("Permission not granted for notifications.");
+      console.log("Benachrichtigungsberechtigung nicht erteilt.");
     }
   };
 
-  // Start timer countdown and update every second
+  // Funktion zum Starten des Timers
   const startTimer = () => {
     if (!timerRunning) {
       setTimerRunning(true);
@@ -70,15 +67,14 @@ const Notification: React.FC = () => {
             clearInterval(timer);
             showNotification();
             setTimerRunning(false);
-            return initialTime; // Reset timer
+            return initialTime; // Timer zurücksetzen
           }
           return prev - 1;
         });
-      }, 1000); // Update every second
+      }, 1000);
     }
   };
 
-  // JSX Layout with centered styling using external CSS classes
   return (
     <IonPage>
       <IonHeader>
@@ -86,7 +82,7 @@ const Notification: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>Notification</IonTitle>
+          <IonTitle>Benachrichtigungen</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>

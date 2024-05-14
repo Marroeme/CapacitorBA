@@ -13,6 +13,7 @@ interface Photo {
 }
 
 const Photos: React.FC = () => {
+  // Zustand für gespeicherte Fotos, Benachrichtigungen und Modals
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [showAlert, setShowAlert] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -20,20 +21,12 @@ const Photos: React.FC = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [currentPhoto, setCurrentPhoto] = useState<Photo | null>(null);
 
+  // Lädt gespeicherte Fotos beim Starten der Komponente
   useEffect(() => {
     loadSavedPhotos();
   }, []);
 
-  const handleLongPress = (photo: Photo) => {
-    setSelectedPhoto(photo);
-    setShowAlert(true);
-  };
-
-  const openModal = (photo: Photo) => {
-    setCurrentPhoto(photo);
-    setShowModal(true);
-  };
-
+  // Funktion zum Laden gespeicherter Fotos
   const loadSavedPhotos = async () => {
     try {
       const result = await Filesystem.readdir({
@@ -58,10 +51,11 @@ const Photos: React.FC = () => {
       );
       setPhotos(loadedPhotos.filter((photo) => photo !== undefined));
     } catch (e) {
-      console.error("Error loading photos:", e);
+      console.error("Fehler beim Laden der Fotos:", e);
     }
   };
 
+  // Funktion zum Aufnehmen eines neuen Fotos
   const takePhoto = async () => {
     try {
       const photo = await Camera.getPhoto({
@@ -90,10 +84,11 @@ const Photos: React.FC = () => {
         setPhotos((prevPhotos) => [...prevPhotos, newPhoto]);
       }
     } catch (error) {
-      console.error("Error taking photo:", error);
+      console.error("Fehler beim Aufnehmen des Fotos:", error);
     }
   };
 
+  // Funktion zum Löschen eines Fotos
   const deletePhoto = async () => {
     if (selectedPhoto) {
       await Filesystem.deleteFile({
@@ -106,11 +101,13 @@ const Photos: React.FC = () => {
     setShowAlert(false);
   };
 
+  // Funktion zum Bearbeiten eines Fotos
   const editPhoto = (photo: Photo) => {
     setCurrentPhoto(photo);
     setShowEditor(true);
   };
 
+  // Funktion zum Speichern des bearbeiteten Fotos
   const saveEditedPhoto = async (editedBase64: string) => {
     if (currentPhoto) {
       await Filesystem.writeFile({
@@ -124,6 +121,18 @@ const Photos: React.FC = () => {
       setShowModal(true);
       setCurrentPhoto({ ...currentPhoto, dataUrl: editedBase64 });
     }
+  };
+
+  // Funktion zum Verarbeiten des langen Tastendrucks
+  const handleLongPress = (photo: Photo) => {
+    setSelectedPhoto(photo);
+    setShowAlert(true);
+  };
+
+  // Funktion zum Öffnen des Modals
+  const openModal = (photo: Photo) => {
+    setCurrentPhoto(photo);
+    setShowModal(true);
   };
 
   return (
@@ -185,15 +194,13 @@ const Photos: React.FC = () => {
               text: "Abbrechen",
               role: "cancel",
               cssClass: "secondary",
-              handler: (blah) => {
+              handler: () => {
                 setShowAlert(false);
               },
             },
             {
               text: "Löschen",
-              handler: () => {
-                deletePhoto();
-              },
+              handler: deletePhoto,
             },
           ]}
         />
@@ -204,7 +211,7 @@ const Photos: React.FC = () => {
                 source={currentPhoto.dataUrl!}
                 savingPixelRatio={1}
                 previewPixelRatio={1}
-                onSave={(editedImageObject, designState) => {
+                onSave={(editedImageObject) => {
                   saveEditedPhoto(editedImageObject.imageBase64!);
                 }}
                 onClose={() => setShowEditor(false)}
